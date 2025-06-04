@@ -3,11 +3,11 @@ import { profesorController } from '../controllers/profesor.controller.js';
 
 const alumnoRoutes = Router();
 
-userRoutes.get('/profesor');
-userRoutes.get('/profesor/:id')
-userRoutes.get('/profesor/:id/materia');
+userRoutes.get('/profesor'); // Muestra todos los profesores
+userRoutes.get('/profesor/:id'); // Muestra un profesor en particular
+userRoutes.get('/profesor/:id/materia'); // Muestra las materias de un profesor
 
-userRoutes.post('/profesor/:id/materia/:id/alumno/:id')
-userRoutes.post('/alumno/:id/tarea/:id')
+userRoutes.post('/profesor/:id/materia/:id/alumno/:id'); // Profesor matricula a un alumno a una materia
+userRoutes.post('/profesor/:id/materia/:id/tarea'); // Profesor sube una tarea a una materia
 
 export default userRoutes;

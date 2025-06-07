@@ -19,11 +19,11 @@ const create = async (req = request, res = response ) => {
 //Matricular alumno
 const insAlum = async (req = request, res = response ) => {
   const connection = await getConnection();
-  const { MateriaID, UsuarioID } = req.body;
+  const {UsuarioID, MateriaID } = req.body;
 
   const [result] = await connection.query(
-    'INSERT INTO usuario(MateriaID, UsuarioID) VALUES (?, ?)',
-    [MateriaID, UsuarioID] 
+    'INSERT INTO matricula(usuarioID, materiaID) VALUES (?, ?)',
+    [UsuarioID, MateriaID] 
   );
 
   res.status(201).json({ ok: true, result, msg: 'Approved' });

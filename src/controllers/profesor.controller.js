@@ -1,7 +1,7 @@
 import { request, response } from 'express';
 import { getConnection } from '../database/database.js';
 
-
+//Crear usuario profesor
 const create = async (req = request, res = response ) => {
   const connection = await getConnection();
   const { nombre, email } = req.body;
@@ -16,5 +16,19 @@ const create = async (req = request, res = response ) => {
 
 
 
+//Matricular alumno
+const insAlum = async (req = request, res = response ) => {
+  const connection = await getConnection();
+  const { MateriaID, UsuarioID } = req.body;
 
-export const profesorController = {create};
+  const [result] = await connection.query(
+    'INSERT INTO usuario(MateriaID, UsuarioID) VALUES (?, ?)',
+    [MateriaID, UsuarioID] 
+  );
+
+  res.status(201).json({ ok: true, result, msg: 'Approved' });
+};
+
+
+
+export const profesorController = {create, insAlum};

@@ -19,7 +19,23 @@ const create = async (req = request, res = response ) => {
 //Matricular alumno
 const insAlum = async (req = request, res = response ) => {
   const connection = await getConnection();
+  const {id: ProfesorID}  = req.params;
   const {UsuarioID, MateriaID } = req.body;
+
+  const [rol, raw] = await connection.query('SELECT rol FROM usuario WHERE id = ?',[
+  ProfesorID,
+  ]);
+
+  console.log(rol)
+  if (rol != "profesor"){
+    res
+    .status(401)
+    .json({
+      ok: false,
+      message: rol
+    });
+    return;
+  }
 
   const [result] = await connection.query(
     'INSERT INTO matricula(usuarioID, materiaID) VALUES (?, ?)',

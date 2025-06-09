@@ -27,7 +27,7 @@ const tarea = async (req = request, res = response) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error al obtener las tareas' });
-    }
+    }               
 }
 
 

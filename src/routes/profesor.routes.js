@@ -3,7 +3,7 @@ import { profesorController } from '../controllers/profesor.controller.js';
 
 const profesorRoutes = Router();
 
-//profesorRoutes.get('/profesor'); // Muestra todos los profesores
+profesorRoutes.get('/profesor', profesorController.findAll); // Muestra todos los profesores
 //profesorRoutes.get('/profesor/:id'); // Muestra un profesor en particular
 //profesorRoutes.get('/profesor/:id/materia'); // Muestra las materias de un profesor
 

@@ -1,7 +1,19 @@
 import { request, response } from 'express';
 import { getConnection } from '../database/database.js';
 
-//Crear usuario profesor
+// Traer todos los usuarios
+const findAll = async (req = request, res = response) => {
+  const connection = await getConnection();
+
+  const [result, raw] = await connection.query('SELECT * FROM usuario WHERE rol = "profesor"')
+
+  res.status(201).json({ok:true, result, msg: 'Approved'})
+}
+
+
+
+
+// Crear usuario profesor
 const create = async (req = request, res = response ) => {
   const connection = await getConnection();
   const { nombre, email } = req.body;
@@ -14,9 +26,7 @@ const create = async (req = request, res = response ) => {
   res.status(201).json({ ok: true, result, msg: 'Approved' });
 };
 
-
-
-//Matricular alumno
+// Matricular alumno
 const insAlum = async (req = request, res = response ) => {
   const connection = await getConnection();
   const {id: ProfesorID}  = req.params;
@@ -47,4 +57,4 @@ const insAlum = async (req = request, res = response ) => {
 
 
 
-export const profesorController = {create, insAlum};
+export const profesorController = {findAll, create, insAlum};

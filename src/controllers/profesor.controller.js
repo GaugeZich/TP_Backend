@@ -54,13 +54,22 @@ const insAlum = async (req = request, res = response ) => {
   const {UsuarioID, MateriaID } = req.body;
 
   const [resultRol, raw] = await connection.query('SELECT rol FROM usuario WHERE id = ?',[
-  ProfesorID,
+    ProfesorID,
+  ]);
+
+  const [resultRolAlum, raw2] = await connection.query('SELECT rol FROM usuario WHERE id = ?',[
+    UsuarioID
   ]);
 
   const rol = resultRol[0].rol
+  const rolAlum = resultRolAlum[0].rol
 
   if (rol !== "profesor"){
-    return res.status(401).json({ok: false, msg: 'El usuario ingresado no es profesor'})
+    return res.status(401).json({ok: false, msg: 'El usuario ingresado no es profesor'});
+  }
+
+  if(rolAlum !== "alumno"){
+    return res.status(401).json({ok:false, msg: 'El usuario a matricular no es alumno'})
   }
 
   const [result] = await connection.query(

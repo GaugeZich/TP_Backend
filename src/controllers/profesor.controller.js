@@ -1,6 +1,10 @@
 import { request, response } from 'express';
 import { getConnection } from '../database/database.js';
 
+/* 
+  Metodos GET:
+*/
+
 // Traer todos los profesores
 const findAll = async (req = request, res = response) => {
   // Conexion con la base de datos
@@ -25,10 +29,10 @@ const findOne = async (req = request, res = response) => {
   // Consulta SQL para traer toda la información de un usuario por su ID
   const [result, raw] = await connection.query('SELECT * FROM usuario WHERE id = ?',
     [idParam]
-  )
+  );
 
   // Guardar los datos del objeto unico
-  const user = result[0]
+  const user = result[0];
 
   // Comprobación de usuario existente
   if(!user){
@@ -44,6 +48,39 @@ const findOne = async (req = request, res = response) => {
   res.status(201).json({ok:true, user, msg: 'Approved'});
 }
 
+const seeMats = async (req = request, res = response) => {
+  // Guardamos el parametro de la URL
+  const idParam = req.params.id;
+
+  // Conexion con la base de datos
+  const connection = await getConnection();
+
+    // Consulta SQL para el rol de un usuario por su ID
+  const [resultRol, raw] = await connection.query('SELECT rol FROM usuario WHERE id = ?',
+    [idParam]
+  );
+
+  // Guardamos el rol del objeto unico
+  const rol = resultRol[0].rol;
+
+  // Comprobación de profesor
+  if (rol !== "profesor"){
+    return res.status(401).json({ok: false, msg: 'El usuario ingresado no es profesor'});
+  }
+
+  // Consulta SQL para traer toda la información de la materia segun el ID del profesor
+  const [result, raw2] = await connection.query('SELECT * FROM materia WHERE usuarioId = ?',
+    [idParam]
+  );
+
+  // Devolver el resultado
+  res.status(201).json({ ok: true, result, msg: 'Approved' });
+}
+
+
+/* 
+  Metodos POST:
+*/
 
 // Crear usuario profesor
 const create = async (req = request, res = response ) => {
@@ -83,8 +120,8 @@ const insAlum = async (req = request, res = response ) => {
   ]);
 
   // Guardamos los datos del objeto unico y traemos el rol
-  const rol = resultRol[0].rol
-  const rolAlum = resultRolAlum[0].rol
+  const rol = resultRol[0].rol;
+  const rolAlum = resultRolAlum[0].rol;
 
   // Comprobación de profesor
   if (rol !== "profesor"){
@@ -108,4 +145,4 @@ const insAlum = async (req = request, res = response ) => {
 
 
 
-export const profesorController = {findAll, findOne, create, insAlum};
+export const profesorController = {findAll, findOne, seeMats, create, insAlum};

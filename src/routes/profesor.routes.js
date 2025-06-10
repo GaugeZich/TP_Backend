@@ -5,7 +5,7 @@ const profesorRoutes = Router();
 
 profesorRoutes.get('/profesor', profesorController.findAll); // Muestra todos los profesores
 profesorRoutes.get('/profesor/:id', profesorController.findOne); // Muestra un profesor en particular
-//profesorRoutes.get('/profesor/:id/materia'); // Muestra las materias de un profesor
+profesorRoutes.get('/profesor/:id/materia', profesorController.seeMats); // Muestra las materias de un profesor
 
 profesorRoutes.post('/profesor', profesorController.create);
 profesorRoutes.post('/profesor/:id/matricular', profesorController.insAlum); // Profesor matricula a un alumno a una materia

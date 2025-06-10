@@ -48,6 +48,7 @@ const findOne = async (req = request, res = response) => {
   res.status(201).json({ok:true, user, msg: 'Approved'});
 }
 
+// Mostrar las materias de un profesor
 const seeMats = async (req = request, res = response) => {
   // Guardamos el parametro de la URL
   const idParam = req.params.id;

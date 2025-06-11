@@ -48,6 +48,7 @@ const findOne = async (req = request, res = response) => {
   res.status(201).json({ok:true, user, msg: 'Approved'});
 }
 
+
 // Mostrar las materias de un profesor
 const seeMats = async (req = request, res = response) => {
   // Guardamos el parametro de la URL
@@ -101,6 +102,7 @@ const create = async (req = request, res = response ) => {
   res.status(201).json({ ok: true, result, msg: 'Approved' });
 };
 
+
 // Matricular alumno
 const insAlum = async (req = request, res = response ) => {
   // Conexion con la base de datos
@@ -112,7 +114,7 @@ const insAlum = async (req = request, res = response ) => {
 
   // Consulta SQL para posterior comprobación de profesor
   const [resultRol, raw] = await connection.query('SELECT rol FROM usuario WHERE id = ?',[
-    ProfesorID,
+    ProfesorID
   ]);
 
   // Consulta SQL para posterior comprobación de alumno
@@ -131,7 +133,7 @@ const insAlum = async (req = request, res = response ) => {
 
   // Comprobación de alumno
   if(rolAlum !== "alumno"){
-    return res.status(401).json({ok:false, msg: 'El usuario a matricular no es alumno'})
+    return res.status(401).json({ok:false, msg: 'El usuario a matricular no es alumno'});
   }
 
   // Consulta SQL para insertar la matricula
@@ -144,6 +146,49 @@ const insAlum = async (req = request, res = response ) => {
   res.status(201).json({ ok: true, result, msg: 'Approved' });
 };
 
+// Profesor sube tarea
+const insTarea = async (req = request, res = response) => {
+  // Conexion con la base de datos
+  const connection = await getConnection();
+
+  // Guardamos ambos parametros enviados por la URL (Id para profesor y materia)
+  const profesorID = req.params.id;
+  const materiaID = req.params.id2;
+
+  const {titulo, descripcion, fechaEntrega} = req.body;
+
+  // Consulta SQL para posterior comprobación de profesor
+  const [resultRol, raw] = await connection.query('SELECT rol FROM usuario WHERE id = ?',[
+    profesorID
+  ]);
+
+  const [resultMat, raw2] = await connection.query('SELECT * FROM materia WHERE id = ? AND usuarioID = ?',
+    [materiaID, profesorID]
+  )
+
+  console.log(resultMat)
+  // Guardamos los datos del objeto unico y traemos el rol
+  const rol = resultRol[0].rol;
+  const mat = resultMat[0];
+
+  // Comprobación de profesor
+  if (rol !== "profesor"){
+    return res.status(401).json({ok: false, msg: 'El usuario ingresado no es profesor'});
+  }
+
+  // Comprobación de si la materia es del profesor 
+  if(!mat){
+    return res.status(401).json({ok: false, msg: 'La materia no es del profesor'});
+  }
+
+  // Consulta SQL para agregar la tarea
+  const [resultTar, raw3] = await connection.query('INSERT INTO tarea(titulo, descripcion, fechaEntrega, usuarioID, materiaID) VALUES (?,?,?,?,?)',
+    [titulo, descripcion, fechaEntrega, profesorID, materiaID]
+  )
+
+  // Respuesta del resultado
+  res.status(201).json({ok: true, msg: "La tarea se ha subido correctamente"})
+}
 
 
-export const profesorController = {findAll, findOne, seeMats, create, insAlum};
+export const profesorController = {findAll, findOne, seeMats, create, insAlum, insTarea};

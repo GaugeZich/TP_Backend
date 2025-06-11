@@ -9,6 +9,6 @@ profesorRoutes.get('/profesor/:id/materia', profesorController.seeMats); // Mues
 
 profesorRoutes.post('/profesor', profesorController.create); // Crear profesores
 profesorRoutes.post('/profesor/:id/matricular', profesorController.insAlum); // Profesor matricula a un alumno a una materia
-//profesorRoutes.post('/profesor/:id/materia/:id/tarea'); // Profesor sube una tarea a una materia
+profesorRoutes.post('/profesor/:id/materia/:id2/tarea', profesorController.insTarea); // Profesor sube una tarea a una materia
 
 export default profesorRoutes;

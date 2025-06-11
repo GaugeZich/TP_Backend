@@ -117,18 +117,29 @@ const insAlum = async (req = request, res = response ) => {
     ProfesorID
   ]);
 
+  // Consulta SQL para posterior comprobación de si la materia es del profesor
+  const [resultMat, raw2] = await connection.query('SELECT * FROM materia WHERE id = ? AND usuarioID = ?',
+    [MateriaID, ProfesorID]
+  )
+
   // Consulta SQL para posterior comprobación de alumno
-  const [resultRolAlum, raw2] = await connection.query('SELECT rol FROM usuario WHERE id = ?',[
+  const [resultRolAlum, raw3] = await connection.query('SELECT rol FROM usuario WHERE id = ?',[
     UsuarioID
   ]);
 
-  // Guardamos los datos del objeto unico y traemos el rol
+  // Guardamos los datos del objeto unico. traemos el rol de los usuarios y la materia
   const rol = resultRol[0].rol;
+  const mat = resultMat[0];
   const rolAlum = resultRolAlum[0].rol;
 
   // Comprobación de profesor
   if (rol !== "profesor"){
     return res.status(401).json({ok: false, msg: 'El usuario ingresado no es profesor'});
+  }
+
+  // Comprobación de si la materia es del profesor 
+  if(!mat){
+    return res.status(401).json({ok: false, msg: 'La materia no es del profesor'});
   }
 
   // Comprobación de alumno
@@ -155,6 +166,7 @@ const insTarea = async (req = request, res = response) => {
   const profesorID = req.params.id;
   const materiaID = req.params.id2;
 
+  // Guardamos los datos enviados en el body
   const {titulo, descripcion, fechaEntrega} = req.body;
 
   // Consulta SQL para posterior comprobación de profesor
@@ -162,12 +174,12 @@ const insTarea = async (req = request, res = response) => {
     profesorID
   ]);
 
+  // Consulta SQL para comprobación de si la materia es del profesor
   const [resultMat, raw2] = await connection.query('SELECT * FROM materia WHERE id = ? AND usuarioID = ?',
     [materiaID, profesorID]
   )
 
-  console.log(resultMat)
-  // Guardamos los datos del objeto unico y traemos el rol
+  // Guardamos los datos del objeto unico
   const rol = resultRol[0].rol;
   const mat = resultMat[0];
 

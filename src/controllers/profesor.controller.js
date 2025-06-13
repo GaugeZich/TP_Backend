@@ -79,6 +79,51 @@ const seeMats = async (req = request, res = response) => {
   res.status(201).json({ ok: true, result, msg: 'Approved' });
 }
 
+// Mostrar los alumnos de una materia
+const seeAlum = async (req = request, res = response) => {
+  //Guaradamos los parametros de la URL:
+  const idProfesor = req.params.id
+  const idMateria = req.params.id2
+
+  // Conexion con la base de datos
+  const connection = await getConnection();
+
+  // Consulta SQL para el rol de un usuario por su ID
+  const [resultRol, raw] = await connection.query('SELECT rol FROM usuario WHERE id = ?',
+    [idProfesor]
+  );
+
+  // Guardamos el rol del objeto unico
+  const rol = resultRol[0].rol;
+
+  // Comprobación de profesor
+  if (rol !== "profesor"){
+    return res.status(401).json({ok: false, msg: 'El usuario ingresado no es profesor'});
+  }
+
+  // Consulta SQL para posterior comprobación de si la materia es del profesor
+  const [resultMat, raw2] = await connection.query('SELECT * FROM materia WHERE id = ? AND usuarioID = ?',
+    [idMateria, idProfesor]
+  );
+
+  // Guardamos el objeto unico
+  const mat = resultMat[0];
+
+  // Comprobación de si la materia es del profesor 
+  if(!mat){
+    return res.status(401).json({ok: false, msg: 'La materia no es del profesor'});
+  }
+
+  // Consulta SQL para traer los alumnos de la materia
+  const [result] = await connection.query(
+    ' SELECT u.id, u.nombre, u.email FROM matricula m INNER JOIN usuario u ON m.usuarioID = u.id WHERE m.materiaID = ?',
+    [idMateria] 
+  );
+
+  // Devolver el resultado
+  res.status(201).json({ ok: true, result, msg: 'Approved' });
+}
+
 
 /* 
   Metodos POST:
@@ -199,8 +244,8 @@ const insTarea = async (req = request, res = response) => {
   )
 
   // Respuesta del resultado
-  res.status(201).json({ok: true, msg: "La tarea se ha subido correctamente"})
+  res.status(201).json({ok: true, resultTar, msg: "La tarea se ha subido correctamente"})
 }
 
 
-export const profesorController = {findAll, findOne, seeMats, create, insAlum, insTarea};
+export const profesorController = {findAll, findOne, seeMats, seeAlum, create, insAlum, insTarea};

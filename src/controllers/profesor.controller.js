@@ -124,6 +124,47 @@ const seeAlum = async (req = request, res = response) => {
   res.status(201).json({ ok: true, result, msg: 'Approved' });
 }
 
+// Mostrar las tareas entregadas en las materias de un profesor
+const seeEnt = async (req = request, res = response) => {
+  // Guardamos el parametro de la URL
+  const idProfesor = req.params.id
+
+  // Conexion con la base de datos
+  const connection = await getConnection();
+
+  // Consulta SQL para el rol de un usuario por su ID
+  const [resultRol, raw] = await connection.query('SELECT rol FROM usuario WHERE id = ?',
+    [idProfesor]
+  );
+
+  // Guardamos el rol del objeto unico
+  const rol = resultRol[0].rol;
+
+  // Comprobación de profesor
+  if (rol !== "profesor"){
+    return res.status(401).json({ok: false, msg: 'El usuario ingresado no es profesor'});
+  }
+
+  // Consulta SQL para traer las entregas
+const [result] = await connection.query(
+  `SELECT 
+      m.nombre AS materia,
+      t.titulo AS tarea,
+      t.fechaEntrega,
+      e.horaEntrega,
+      u.nombre AS alumno
+   FROM entrega e
+   JOIN tarea t ON e.tareaID = t.id
+   JOIN usuario u ON e.usuarioID = u.id
+   JOIN materia m ON t.materiaID = m.id
+   WHERE m.usuarioID = ?`,
+  [idProfesor]
+);
+
+  // Devolver el resultado
+  res.status(201).json({ ok: true, result, msg: 'Approved' });
+}
+
 
 /* 
   Metodos POST:
@@ -248,4 +289,4 @@ const insTarea = async (req = request, res = response) => {
 }
 
 
-export const profesorController = {findAll, findOne, seeMats, seeAlum, create, insAlum, insTarea};
+export const profesorController = {findAll, findOne, seeMats, seeAlum, seeEnt, create, insAlum, insTarea};

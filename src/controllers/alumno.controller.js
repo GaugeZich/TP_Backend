@@ -1,6 +1,27 @@
 import { request,response } from "express";
 import { getconnection } from "../database/database.js";
 
+
+// traer a todos los alumnos
+const getAll = async(req = request, res =  response) =>{
+    const connection  = await getconnection();
+    
+    const [result] = await connection.query('SELECT * FROM usuarios WHERE rol = "alumno"');
+    res.status(201).json({ok: true, result,msg : 'Lista de alumnos obtenida'});
+}
+
+const getId = async(req = request, res = response) =>{
+    const idParam = req.params.id;
+    const connection = await getconnection();
+
+    const [result] = await  connection.query( 'SELECT * FROM usuarios where id = ?', [idParam]);
+    
+    const rol = result[0].rol
+    if (rol !== 'alumno'){
+        return res.status(401).json({ok: false, msg: 'Este usuario no es un alumno'});
+    }
+}
+
 // Crear usuario alumno
 const create = async (req = request, res = response) => {
     const { nombre, apellido, email } = req.body;
@@ -14,7 +35,7 @@ const create = async (req = request, res = response) => {
     }
 }
 
-
+// Consultar tareas del alumno
 const tarea = async (req = request, res = response) => {
     const connection = await getconnection();
     const {usuarioID}= req.body;
@@ -30,7 +51,7 @@ const tarea = async (req = request, res = response) => {
     }               
 }
 
-
+// Entregar tarea
 const entregarTarea = async (req = request, res = response) => {
     const connection = await getconnection();
     const { tareaID, usuarioID } = req.body;
@@ -46,9 +67,45 @@ const entregarTarea = async (req = request, res = response) => {
     }
 }
 
+// alumno se matricula en una materia
+const matricularMateria = async (req = request, res = response) => {
+    const connection = await getconnection();
+    const { usuarioID, materiaID } = req.body;
+    try {
+        const [result] = await connection.query('INSERT INTO materias (usuarioID, materiaID) VALUES (?, ?)', [usuarioID, materiaID]);
+        res.status(201).json({ message: 'Materia matriculada correctamente', id: result.insertId });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al matricular en la materia' });
+    }
+}
 
+// Ver materias matriculadas por el alumno
+
+const verMateriaMatriculada = async(req = request, res = response) => {
+    const connection = await getconnection()
+    const {usuarioID} = req.body;
+    try {
+        const [result] = await connection.query('SELECT * FROM materias WHERE usuarioID = ?', [usuarioID]);
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron materias matriculadas para este alumno' });
+        }
+        res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al obtener las materias matriculadas' });
+    }
+}
+
+
+
+// Exportar las funciones del controlador
 export const alumnoController = {
+    getAll,
+    getId,
     create,
     tarea,
-    entregarTarea
+    entregarTarea,
+    verMateriaMatriculada,
+    matricularMateria,
 };

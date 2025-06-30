@@ -1,33 +1,35 @@
 import { request,response } from "express";
-import { getconnection } from "../database/database.js";
+import { getConnection } from "../database/database.js";
 
 
 // traer a todos los alumnos
 const getAll = async(req = request, res =  response) =>{
-    const connection  = await getconnection();
+    const connection  = await getConnection();
     
-    const [result] = await connection.query('SELECT * FROM usuarios WHERE rol = "alumno"');
+    const [result] = await connection.query('SELECT * FROM usuario WHERE rol = "alumno"');
     res.status(201).json({ok: true, result,msg : 'Lista de alumnos obtenida'});
 }
 
 const getId = async(req = request, res = response) =>{
     const idParam = req.params.id;
-    const connection = await getconnection();
+    const connection = await getConnection();
 
-    const [result] = await  connection.query( 'SELECT * FROM usuarios where id = ?', [idParam]);
+    const [result] = await  connection.query( 'SELECT * FROM usuario where id = ?', [idParam]);
     
     const rol = result[0].rol
     if (rol !== 'alumno'){
         return res.status(401).json({ok: false, msg: 'Este usuario no es un alumno'});
     }
+
+    res.status(201).json({ok: true, result,msg : 'Alumno obtenido'});
 }
 
 // Crear usuario alumno
 const create = async (req = request, res = response) => {
-    const { nombre, apellido, email } = req.body;
-    const connection = await getconnection();
+    const { nombre, email } = req.body;
+    const connection = await getConnection();
     try {
-        const [result] = await connection.query('INSERT INTO usuarios (nombre, apellido, email) VALUES (?, ?, ?)', [nombre, apellido, email]);
+        const [result] = await connection.query('INSERT INTO usuario (nombre, email, rol) VALUES (?, ?, 2)', [nombre, email]);
         res.status(201).json({ message: 'Alumno creado', id: result.insertId });
     } catch (error) {
         console.error(error);
@@ -37,10 +39,10 @@ const create = async (req = request, res = response) => {
 
 // Consultar tareas del alumno
 const tarea = async (req = request, res = response) => {
-    const connection = await getconnection();
+    const connection = await getConnection();
     const {usuarioID}= req.body;
     try {
-        const [result] = await connection.query('SELECT * FROM tareas WHERE usuarioID = ?', [usuarioID]);
+        const [result] = await connection.query('SELECT * FROM tarea WHERE usuarioID = ?', [usuarioID]);
         if (result.length === 0) {
             return res.status(404).json({ message: 'No se encontraron tareas para este alumno' });
         }
@@ -53,10 +55,11 @@ const tarea = async (req = request, res = response) => {
 
 // Entregar tarea
 const entregarTarea = async (req = request, res = response) => {
-    const connection = await getconnection();
+    const connection = await getConnection();
     const { tareaID, usuarioID } = req.body;
     try {
-        const [result] = await connection.query('UPDATE tareas SET entregada = 1 WHERE id = ? AND usuarioID = ?', [tareaID, usuarioID]);
+        const [result] = await connection.query('INSERT INTO entrega (tareaID, usuarioID) VALUES (?, ?)',
+            [tareaID, usuarioID]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Tarea no encontrada o no pertenece a este alumno' });
         }
@@ -69,10 +72,10 @@ const entregarTarea = async (req = request, res = response) => {
 
 // alumno se matricula en una materia
 const matricularMateria = async (req = request, res = response) => {
-    const connection = await getconnection();
+    const connection = await getConnection();
     const { usuarioID, materiaID } = req.body;
     try {
-        const [result] = await connection.query('INSERT INTO materias (usuarioID, materiaID) VALUES (?, ?)', [usuarioID, materiaID]);
+        const [result] = await connection.query('INSERT INTO matricula (usuarioID, materiaID) VALUES (?, ?)', [usuarioID, materiaID]);
         res.status(201).json({ message: 'Materia matriculada correctamente', id: result.insertId });
     } catch (error) {
         console.error(error);
@@ -81,12 +84,11 @@ const matricularMateria = async (req = request, res = response) => {
 }
 
 // Ver materias matriculadas por el alumno
-
 const verMateriaMatriculada = async(req = request, res = response) => {
-    const connection = await getconnection()
-    const {usuarioID} = req.body;
+    const connection = await getConnection()
+    const usuarioID = req.params.id;
     try {
-        const [result] = await connection.query('SELECT * FROM materias WHERE usuarioID = ?', [usuarioID]);
+        const [result] = await connection.query('SELECT * FROM matricula WHERE usuarioID = ?', [usuarioID]);
         if (result.length === 0) {
             return res.status(404).json({ message: 'No se encontraron materias matriculadas para este alumno' });
         }
